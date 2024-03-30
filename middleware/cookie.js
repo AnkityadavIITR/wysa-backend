@@ -7,7 +7,7 @@ export const sendCookies=(res,user,message,status)=>{
     .cookie("token",token,{
         httpOnly:true,
         maxAge:24*60*60*1000,
-        sameSite:none,
+        sameSite: "none",
         secure: true,
         path:"/"
     })
