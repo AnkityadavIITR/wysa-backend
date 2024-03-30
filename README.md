@@ -16,7 +16,7 @@ Follow these steps to run the Wysa backend server locally:
 1. Clone this repository to your local machine:
 
    ```bash
-   git clone https://github.com/yourusername/wysa-backend.git
+   git clone https://github.com/AnkityadavIITR/wysa-backend.git
    ```
 
 2. Navigate to the project directory:
