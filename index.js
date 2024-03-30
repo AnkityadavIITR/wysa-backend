@@ -1,5 +1,5 @@
 import express from "express";
-import http from "http";
+import { createServer } from "http";
 import { Server } from "socket.io";
 import { config } from "dotenv";
 import { dbconnect } from "./database/data.js";
@@ -25,11 +25,13 @@ app.use(
   })
 );
 
-const server = http.createServer(app);
+app.use("/unauth", unauthRouter);
+
+const server = createServer(app);
+
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URI,
-    methods: ["GET", "POST"],
     credentials: true,
   },
 });
@@ -40,7 +42,7 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/unauth", unauthRouter);
+
 app.use("/user", userRouter);
 
 //middleware for socket auth check
@@ -69,7 +71,7 @@ io.use((socket, next) => {
 });
 
 io.on("connection", (socket) => {
-//   console.log("new user is connected", socket.id);
+  // console.log("new user is connected", socket.id);
 
   const sendWelcomeMessages = () => {
     socket.emit("welcome", "Hi there!👋");
