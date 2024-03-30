@@ -1,6 +1,7 @@
 import User from "../modals/user.js";
 import { sendCookies } from "../middleware/cookie.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export const addNewUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -15,13 +16,20 @@ export const addNewUser = async (req, res) => {
   try {
     //bcryprting the password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({
+    const user = await User.create({
       name: name,
       email: email,
       password: hashedPassword,
     });
     console.log(process.env.JWT_SECRET);
-    sendCookies(res, newUser, "successfully register", 201);
+    const token=jwt.sign({_id:user._id},process.env.JWT_SECRET);
+    return res.status(201).json({
+      success:"true",
+      message,
+      user,
+      token
+    })
+    // sendCookies(res, newUser, "successfully register", 201);
   } catch (err) {
     res.json({ success: false, message: "error in register" });
   }
@@ -39,8 +47,18 @@ export const logInUser = async (req, res) => {
 
       if (isMatch) {
         console.log("match");
-        const userWithPost = await User.findOne({ _id: user._id });
-        sendCookies(res, userWithPost, "succefully login", 200);
+        // const user = await User.findOne({ _id: user._id });
+        const token=jwt.sign({_id:user._id},process.env.JWT_SECRET);
+        console.log(token);
+
+        return res.status(200).json({
+          success:"true",
+          message:"successfull logged in",
+          user,
+          token
+        })
+
+        // sendCookies(res, userWithPost, "succefully login", 200);
       } else res.json({ success: false, message: "incorrect password" });
     } else {
       res.json({ success:false, message:"user doesn't exist" });

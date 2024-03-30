@@ -8,8 +8,7 @@ import unauthRouter from "./routes/unauthRoutes.js";
 import User from "./modals/user.js";
 import jwt from "jsonwebtoken";
 import cors from "cors";
-import cookieParser from "cookie-parser";
-import cookieSession from "cookie-session";
+
 
 config();
 dbconnect();
@@ -17,15 +16,6 @@ dbconnect();
 const PORT = process.env.PORT || 4000;
 const app = express();
 
-app.use(
-  cookieSession({
-    name: "session",
-    keys: ["cyberwolve"],
-    maxAge: 24 * 60 * 60 * 1000,
-  })
-);
-
-app.use(cookieParser());
 
 app.use(
   cors({
@@ -54,31 +44,27 @@ app.use("/unauth", unauthRouter);
 app.use("/user", userRouter);
 
 //middleware for socket auth check
-io.use(async (socket, next) => {
-//   console.log("used");
-//   console.log(socket.request.headers);
+io.use((socket, next) => {
+  console.log(socket);
+  const { token } = socket.handshake.auth;
+  console.log(token)
 
-  // Check if the cookie exists in the request
-  if (socket.request.headers.cookie) {
-    const token = socket.request.headers.cookie
-      .split("; ")
-      .find((cookie) => cookie.startsWith("token="));
-    if (token) {
-      const authToken = token.split("=")[1];
-      // User is authenticated, proceed with the connection
-      try {
-        const decodetoken = jwt.verify(authToken, process.env.JWT_SECRET);
-        const user = await User.findById(decodetoken._id);
-        if (user) {
-          socket.user = user;
-          return next();
-        }
-      } catch (error) {
-        console.error("Error verifying token:", error);
-      }
+  if (token && token.startsWith("Bearer ")) {
+    const authToken = token.split(" ")[1];
+    console.log(authToken);
+
+    try {
+      const decodedToken = jwt.verify(authToken, process.env.JWT_SECRET);
+      socket.user = decodedToken;
+
+      return next();
+    } catch (error) {
+      console.error("Error verifying token:", error);
+      return next(new Error("Unauthorized"));
     }
   }
-  // User is not authenticated, reject the connection
+
+  // No authorization header or invalid format
   return next(new Error("Unauthorized"));
 });
 
