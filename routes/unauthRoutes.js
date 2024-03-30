@@ -7,6 +7,7 @@ const loginScreenConfig = {
 };
 
 router.get("/login/config",(req,res)=>{
+    console.log(loginScreenConfig);
     return res.json({
         success:true,
         config:loginScreenConfig
