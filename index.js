@@ -11,11 +11,11 @@ import cors from "cors";
 
 
 config();
-dbconnect();
+
 
 const PORT = process.env.PORT || 4000;
 const app = express();
-
+dbconnect();
 
 app.use(
   cors({

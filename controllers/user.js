@@ -22,10 +22,11 @@ export const addNewUser = async (req, res) => {
       password: hashedPassword,
     });
     console.log(process.env.JWT_SECRET);
+    console.log(user);
     const token=jwt.sign({_id:user._id},process.env.JWT_SECRET);
     return res.status(201).json({
       success:"true",
-      message,
+      message:"your account is created",
       user,
       token
     })
